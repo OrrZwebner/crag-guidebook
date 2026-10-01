@@ -26,8 +26,9 @@ Context sources (--context):
   none   pins only
 
 Requests are paced (--delay, default 10 s). An overloaded server (5xx, timeout) falls
-through to public mirrors; HTTP 403/429 or a challenge page stops fetching for the
-rest of the run (no retries) and is reported: record the gap, never work around a block.
+through to public mirrors, and if all fail only that map goes without context; HTTP
+403/429 or a challenge page stops fetching for the rest of the run (no retries) and is
+reported: record the gap, never work around a block.
 Maps already fetched are cached, so a later run only fetches what is missing.
 
 Usage
@@ -464,7 +465,7 @@ def main():
             file_ctx = json.load(f)
 
     groups = parse_split(args.split, sectors)
-    written, notes, stopped, fetched = [], [], None, 0
+    written, notes, stopped, fetched, failed = [], [], None, 0, []
     for i, ids in enumerate(groups, 1):
         chosen = [s for s in sectors if s['n'] in ids]
         mid = sum(s['lon'] for s in chosen) / len(chosen)
@@ -500,7 +501,10 @@ def main():
                         json.dump(context, f)
                     ctx_status = 'fetched'
                 except Stop as exc:
-                    stopped = {'status': exc.status, 'detail': exc.detail, 'map': path}
+                    if exc.status == 'blocked':      # a block ends fetching for the whole run
+                        stopped = {'status': exc.status, 'detail': exc.detail, 'map': path}
+                    else:                            # overload/timeout: this map only
+                        failed.append({'map': path, 'detail': exc.detail})
             if context is None:
                 ctx_status = 'unavailable'
         counts = draw(path, chosen, axis_xy, proj, right, args.width, height, ext, pad, context)
@@ -518,6 +522,11 @@ def main():
                      'only. Do not retry in a loop; record the gap in HANDOVER.md, or pass a '
                      'saved Overpass export with --context file.'
                      % (stopped['status'], stopped['detail'], stopped['map']))
+    if failed:
+        notes.append('OpenStreetMap context unavailable for %s (%s): the servers were overloaded or '
+                     'offline. Those maps are pins only; rerun later — fetched maps are cached, so '
+                     'only the missing ones are requested.' % (', '.join(f['map'] for f in failed),
+                                                             failed[0]['detail']))
     if any(m['context'] in ('fetched', 'cache', 'file') for m in written):
         notes.append('The maps show OSM data: keep the "%s" credit on the credits page, and '
                      'keep the *_osm.json caches next to the maps so a rebuild is offline.'
@@ -533,6 +542,7 @@ def main():
     notes.append('Look at each map. The label placer spreads labels vertically but cannot '
                  'solve every collision; split a dense cluster into its own map with --split.')
     print(json.dumps({'ok': True, 'maps': written, 'notes': notes, 'context_stopped': stopped,
+                      'context_failed': failed,
                       'next_step': 'Add each image to "maps" in crag.json (path relative to '
                                    'the crag folder) with kicker, title, caption and sectors.'},
                      indent=1))

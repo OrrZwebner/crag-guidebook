@@ -349,6 +349,7 @@ COMMONS_FILES = {
 class FakeWeb(http.server.BaseHTTPRequestHandler):
     log = []
     block = set()
+    overload = set()
 
     def log_message(self, *a):
         pass
@@ -365,6 +366,8 @@ class FakeWeb(http.server.BaseHTTPRequestHandler):
         root = u.path.split('/')[1]
         if root in FakeWeb.block:
             return self.reply(403, b'Forbidden', 'text/plain')
+        if root in FakeWeb.overload:
+            return self.reply(504, b'Gateway Timeout', 'text/plain')
         if u.path == '/overpass':
             return self.reply(200, json.dumps({'elements': OSM_ELEMENTS}).encode())
         if u.path == '/commons':
@@ -402,7 +405,7 @@ class FetchTopos(unittest.TestCase):
 
     def setUp(self):
         Fixture.setUp(self)
-        FakeWeb.log, FakeWeb.block = [], set()
+        FakeWeb.log, FakeWeb.block, FakeWeb.overload = [], set(), set()
 
     def ft(self, *args):
         return run('fetch_topos.py', *(list(args) + ['--delay', '0', '--timeout', '5',
@@ -527,6 +530,23 @@ class FetchTopos(unittest.TestCase):
         self.assertEqual(out['context_stopped']['status'], 'blocked')
         self.assertEqual([m['context'] for m in out['maps']], ['unavailable', 'unavailable'])
         self.assertEqual(len(FakeWeb.log), 1)                    # no retry, no mirror after a block
+
+    def test_maps_overload_continues(self):
+        if not has('matplotlib'):
+            self.skipTest('matplotlib not available')
+        FakeWeb.overload = {'overpass'}
+        code, out, _ = run('make_maps.py', '--crag', self.crag_path, '--out',
+                           os.path.join(self.tmp, 'maps'), '--split', '1-2,3-4', '--no-mirrors',
+                           '--overpass-url', self.base + '/overpass', '--delay', '0', '--timeout', '5')
+        self.assertEqual(code, 0)
+        self.assertIsNone(out['context_stopped'])                # a 5xx is not a block
+        self.assertEqual(len(out['context_failed']), 2)          # each map tried, none skipped
+        self.assertEqual(len(FakeWeb.log), 2)
+        FakeWeb.overload = set()                                 # server recovers: rerun fetches
+        code, out, _ = run('make_maps.py', '--crag', self.crag_path, '--out',
+                           os.path.join(self.tmp, 'maps'), '--split', '1-2,3-4', '--no-mirrors',
+                           '--overpass-url', self.base + '/overpass', '--delay', '0', '--timeout', '5')
+        self.assertEqual([m['context'] for m in out['maps']], ['fetched', 'fetched'])
 
     def test_offline(self):
         code, out, _ = run('fetch_topos.py', 'find', '--lat', '-30', '--lon', '-20',
