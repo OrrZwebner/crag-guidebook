@@ -205,6 +205,12 @@ phone. It is better than a static image, because it zooms and travels.
 Say so plainly rather than apologising: the printed maps carry the scaled geometry
 and the KML carries the imagery.
 
+The printed maps are not bare pins: `make_maps.py` draws OpenStreetMap vector data
+(Overpass API) under them — roads by class, tracks, footpaths, cliffs with their
+down-slope ticks, water, buildings and car parks — and caches it next to the map.
+Overpass rate-limits bursts (429 after ~3 quick queries, observed 2026-10-01); the
+script paces requests, falls through to public mirrors on 5xx, and stops on 403/429.
+
 ---
 
 ## Contradictions worth hunting for

@@ -247,7 +247,7 @@ def sector_html(s, meta, img):
     if s.get('asl'):
         facts.append(('Altitude', e(s['asl'])))
     if s.get('aspect'):
-        flag = ' · calc., contradicted' if s.get('shade_override') else ''
+        flag = (' · ' + gs.override_words(s)['flag']) if s.get('shade_override') else ''
         facts.append(('Aspect', '%s (%s°)%s%s' % (
             e(s['aspect']), e(s.get('aspect_deg', '?')),
             (' · %s bank' % e(s['bank'])) if s.get('bank') and s.get('bank') != 'stated' else '',
@@ -274,8 +274,8 @@ def sector_html(s, meta, img):
         prose.append('<h3>Conditions</h3><p>%s</p>' % s['shade_override']['sentence'])
         calc = dict(s)
         calc.pop('shade_override')
-        prose.append('<p class="small">Calculation, contradicted by the observation above: %s. '
-                     '%s.</p>' % (e(gs.shade_headline(calc, meta)), gs.GENERATED_MARKER))
+        prose.append('<p class="small">%s: %s. %s.</p>' % (
+            gs.override_words(s)['calc'], e(gs.shade_headline(calc, meta)), gs.GENERATED_MARKER))
     else:
         prose.append('<h3>Conditions</h3><p>%s</p>' % conditions_sentence(s, meta))
     if s.get('conditions_extra'):
@@ -376,13 +376,13 @@ def contents_html(crag, html_mode):
     page_head = 'Sector' if html_mode else 'Page'
     return ('<div class="landscape"><div class="phk">Contents</div>'
             '<h2 class="ph">%s</h2><div class="rule"></div>'
-            '<table class="toc"><tr>'
+            '<table class="toc"><thead><tr>'
             '<th>#</th><th style="width:38mm">Sector</th><th style="text-align:right">%s</th>'
             '<th style="width:27mm">Shade, %s</th><th style="width:26mm">Grades · aspect</th>'
             '<th style="width:20mm">Rating</th><th style="width:26mm;text-align:right">Popularity</th>'
             '<th style="width:34mm">Bolted</th><th style="width:40mm">Bolt status</th>'
             '<th style="width:22mm">Type</th><th style="text-align:right">Height</th>'
-            '<th style="text-align:right">Max QDs</th></tr>%s</table>'
+            '<th style="text-align:right">Max QDs</th></tr></thead><tbody>%s</tbody></table>'
             '<div class="tlegend">%s</div></div>'
             % (e(crag.get('contents_title', 'The sectors at a glance')), page_head,
                e(gs.month_label(meta)), '\n'.join(rows), legend))
@@ -459,7 +459,8 @@ def planning_html(crag):
 
     def cell(s, calc):
         if s.get('shade_override'):
-            return '%s <span class="small">(observed)</span>' % s['shade_override']['short']
+            return '%s <span class="small">(%s)</span>' % (s['shade_override']['short'],
+                                                          gs.override_words(s)['tag'])
         return calc
 
     out = ['<div class="two">']
@@ -477,9 +478,10 @@ def planning_html(crag):
     if groups['none']:
         out.append('<div class="box"><div class="boxh">Little or no shade</div>%s</div>'
                    % table(groups['none'], 'Sun', lambda s: cell(s, '%s–%s' % tuple(s['sun']))))
-    if any(s.get('shade_override') for s in crag['sectors']):
-        out.append('<p class="small">Sectors marked <i>observed</i> are placed last in their '
-                   'group: a first-hand observation contradicted the calculation there.</p>')
+    for kind, w in gs.OVERRIDE_WORDS.items():
+        if any(s.get('shade_override') and gs.override_words(s) is w for s in crag['sectors']):
+            out.append('<p class="small">Sectors marked <i>%s</i> are placed last in their '
+                       'group: %s.</p>' % (w['tag'], w['note']))
     out.append('</div>')
     return ''.join(out)
 

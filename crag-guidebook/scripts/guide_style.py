@@ -59,6 +59,25 @@ APPENDIX_MARKER = 'APPENDIX'      # kicker of back pages; the parser stops route
 # paragraph that has it (it is regenerated) and keeps later ones as conditions_extra.
 GENERATED_MARKER = 'Calculated, not observed'
 
+# shade_override.kind: 'observed' (default) = a first-hand observation on a visit;
+# 'source' = a conditions statement from a guidebook or database (e.g. "shade after 15:00
+# in winter"). Same mechanics, different wording, so a database quote is never passed off
+# as somebody's observation.
+OVERRIDE_WORDS = {
+    'observed': {'flag': 'calc., contradicted', 'tag': 'observed',
+                 'calc': 'Calculation, contradicted by the observation above',
+                 'note': 'a first-hand observation contradicted the calculation there'},
+    'source':   {'flag': 'calc., superseded by source', 'tag': 'source',
+                 'calc': 'Calculation, superseded by the source statement above',
+                 'note': 'a guidebook or database states the shade there, and that statement '
+                         'replaces the calculation'},
+}
+
+
+def override_words(sector):
+    ov = sector.get('shade_override') or {}
+    return OVERRIDE_WORDS.get(ov.get('kind', 'observed'), OVERRIDE_WORDS['observed'])
+
 DEFAULT_TOP_PICK_SYMBOL = '♪'   # ♪
 DEFAULT_TOP_PICK_LABEL = 'Top pick'
 

@@ -78,6 +78,7 @@ def read_pdf(path):
         return txt.split('\f'), {}, None, {}
     doc = pymupdf.open(path)
     pages, starts, images, contents = [], {}, 0, {}
+    cols, last_toc = None, -2          # contents columns, remembered for continuation pages
     for i, page in enumerate(doc):
         pages.append(page.get_text())
         images += len(page.get_image_info())
@@ -95,14 +96,22 @@ def read_pdf(path):
             x0 = heads['PAGE'] - 15
             x1 = min([x for x in heads.values() if x > heads['PAGE']] + [x0 + 60]) - 2
             hy = max(s['bbox'][1] for s in sp if squash(s['text']) == 'PAGE')
-            rows = sorted((s['bbox'][1], int(s['text'])) for s in sp
-                          if s['text'].strip().isdigit() and s['bbox'][0] < 45
-                          and s['bbox'][1] > hy + 5 and abs(s['size'] - 8.0) < 0.15)
-            for y, n in rows:
-                cell = [s['text'].strip() for s in sp if abs(s['bbox'][1] - y) < 4
-                        and x0 <= s['bbox'][0] < x1 and s['text'].strip().isdigit()]
-                if cell:
-                    contents[n] = int(cell[0])
+            cols = (x0, x1)
+        elif cols and i == last_toc + 1 and not badge:
+            # a contents table that runs onto a page without a repeated header row
+            x0, x1 = cols
+            hy = -1e9
+        else:
+            continue
+        last_toc = i
+        rows = sorted((s['bbox'][1], int(s['text'])) for s in sp
+                      if s['text'].strip().isdigit() and s['bbox'][0] < 45
+                      and s['bbox'][1] > hy + 5 and abs(s['size'] - 8.0) < 0.15)
+        for y, n in rows:
+            cell = [s['text'].strip() for s in sp if abs(s['bbox'][1] - y) < 4
+                    and x0 <= s['bbox'][0] < x1 and s['text'].strip().isdigit()]
+            if cell:
+                contents[n] = int(cell[0])
     return pages, starts, images, contents
 
 

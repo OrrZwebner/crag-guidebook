@@ -19,7 +19,7 @@ compatibility: >-
   checks), Pillow and pillow-heif (photo GPS, HEIC), matplotlib (plan maps). Web access helps
   for research.
 metadata:
-  version: 1.1.0
+  version: 1.2.0
 ---
 
 # Crag guidebook
@@ -141,7 +141,10 @@ a valley, 0–5° for an open crag; set `aspect_manual` where the aspect is know
 the axis file next to `crag.json`.** The guide prints **shade = climbable hours** (the
 complement of the sun window within daylight), never "Sun HH:MM–HH:MM", everywhere.
 Label every calculated value approximate. Cross-check against every source that
-describes conditions. Read `references/conditions.md`.
+describes conditions; if the default model (±88° arc) misses most of them in one
+direction, recalibrate `--arc`/`--horizon` against them, print the agreement, and don't
+tune a sector's aspect to fit its own check. A source-stated shade time can replace the
+calculation as `shade_override` with `"kind": "source"`. Read `references/conditions.md`.
 
 ### 7. Editorial pages (P7)
 Write HTML into `front_pages` / `mid_pages` / `back_pages`:
@@ -176,6 +179,16 @@ images embedded). When its JSON says `"renderer": "html"`, tell the user:
 2. Choose **Print**.
 3. Set destination **Save as PDF**, paper **A4**, and turn **Background graphics** on.
 The HTML contents shows sector numbers instead of page numbers.
+
+`make_maps.py` draws OpenStreetMap context (roads, tracks, paths, cliffs, water,
+buildings, car parks) under the pins on a light background, fetched from Overpass once
+and cached as `maps/*_osm.json` (paced; mirrors on overload; stops on 403/429). Look at
+every map; if context was unavailable, record it in HANDOVER and rerun later — the
+cache keeps what was fetched. Put the OSM (ODbL) credit on the credits page. For
+separate crags, `--split` them into one map each. Its `cliff_check` compares each
+sector's aspect with the down-slope side of the nearest mapped cliff: a disagreement
+(>90°) means the OSM way is drawn backwards or the aspect is wrong — check, and log it
+in the contradictions appendix.
 
 Explain the KML rather than apologising for having no satellite image: imported into a
 map app it pins every sector on satellite imagery, on a phone.
@@ -217,7 +230,8 @@ limitation: it reads only PDFs this skill rendered with WeasyPrint.
 
 - **Observation beats calculation, visibly.** Contradicted → `shade_override`, the
   calculation stays visible marked contradicted, say what was not observed, add an
-  appendix row. Agreeing → `conditions_extra`, credited.
+  appendix row. Agreeing → `conditions_extra`, credited. A database or guidebook
+  statement is not an observation: use `"kind": "source"` so it prints as a source.
 - **Shade, not sun.** Print when the wall is climbable; lead with the longer shade
   segment.
 - **Always print the accuracy caveat** at the front.
@@ -236,7 +250,7 @@ limitation: it reads only PDFs this skill rendered with WeasyPrint.
 | Script | Does | Needs |
 |---|---|---|
 | `crag_conditions.py` | axis → bank → aspect → sun window; `conditions_meta`; keeps overrides | stdlib |
-| `make_maps.py` | scaled plan maps with pins and aspect arrows | matplotlib (optional) |
+| `make_maps.py` | scaled plan maps: OSM context (cached), pins, aspect arrows, parking | matplotlib (optional), web |
 | `export_geo.py` | KML, GPX, CSV with shade text and parking pins | stdlib |
 | `build_guide.py` | `crag.json` → PDF, or self-contained HTML fallback | WeasyPrint (optional) |
 | `verify_guide.py` | checklist over the built guide + `crag.json` | PyMuPDF for PDF |

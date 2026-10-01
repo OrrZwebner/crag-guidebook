@@ -471,12 +471,14 @@ def main():
         keep = drop_generated(cond)
         if headline and not generated:
             shade_head = re.split(r' · \d+ routes', headline)[0]
-            sec['shade_override'] = dict(headline=shade_head,
+            kind = 'observed' if 'observed' in shade_head.lower() else 'source'
+            sec['shade_override'] = dict(headline=shade_head, kind=kind,
                                          sentence=keep[0] if keep else '',
                                          table=shade_head, short=shade_head)
             keep = keep[1:]
-            report['review'].append('Sector %s: observed shade override recovered from the '
-                                    'headline; rewrite its "table" and "short" cells.' % s['n'])
+            report['review'].append('Sector %s: %s shade override recovered from the '
+                                    'headline; rewrite its "table" and "short" cells.'
+                                    % (s['n'], kind))
         if keep:
             sec['conditions_extra'] = '\n\n'.join(keep)
         sec.update({k: v for k, v in contents.get(s['n'], {}).items()
