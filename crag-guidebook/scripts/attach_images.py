@@ -16,13 +16,15 @@ Usage
 -----
   python3 scripts/attach_images.py --crag crag.json \\
       --credit "web=Topo — community site, freely viewable size; numbers match the table" \\
-      --credit "book=Topo — from the printed guidebook (personal use)"
+      --credit "book=Topo — from the printed guidebook (personal use)" \\
+      --author "book=<guidebook title>" --licence "book=personal use"
   python3 scripts/attach_images.py --crag crag.json --dry-run
 
 Prints {"ok", "added": [...], "already_attached": n, "unmatched": [...]}.
 """
 
 import argparse
+import datetime
 import json
 import os
 import re
@@ -38,6 +40,10 @@ def main():
     ap.add_argument('--assets', help='crag folder (default: folder of --crag)')
     ap.add_argument('--credit', action='append', default=[], metavar='SRC=CAPTION',
                     help='caption for images from <src>; repeatable')
+    ap.add_argument('--author', action='append', default=[], metavar='SRC=NAME',
+                    help='credit (author/owner) for images from <src>; repeatable')
+    ap.add_argument('--licence', action='append', default=[], metavar='SRC=LICENCE',
+                    help='licence for images from <src>, e.g. "personal use", "own photo"')
     ap.add_argument('--dry-run', action='store_true')
     args = ap.parse_args()
 
@@ -45,6 +51,9 @@ def main():
     with open(args.crag, encoding='utf-8') as f:
         crag = json.load(f)
     credits = dict(c.split('=', 1) for c in args.credit if '=' in c)
+    authors = dict(c.split('=', 1) for c in args.author if '=' in c)
+    licences = dict(c.split('=', 1) for c in args.licence if '=' in c)
+    today = datetime.date.today().isoformat()
     by_n = {s.get('n'): s for s in crag['sectors']}
 
     added, unmatched, already = [], [], 0
@@ -72,6 +81,9 @@ def main():
             entry = {'image': rel, 'caption': cap}
             if photo:
                 entry['photo'] = True
+            if src in authors or src in licences:
+                entry.update(source=src, credit=authors.get(src, ''),
+                             licence=licences.get(src, ''), retrieved=today)
             s.setdefault('topos', []).append(entry)
             added.append({'sector': n, 'image': rel, 'caption': cap})
 
@@ -85,7 +97,9 @@ def main():
     print(json.dumps({'ok': True, 'dry_run': args.dry_run, 'added': added,
                       'already_attached': already, 'unmatched': unmatched,
                       'next_step': 'Check every caption credits its source and says whether '
-                                   'the route numbers match the table; then rebuild.'},
+                                   'the route numbers match the table, and that every entry '
+                                   'has credit and licence (--author/--licence); then '
+                                   'rebuild.'},
                      ensure_ascii=False, indent=1))
     return 0
 

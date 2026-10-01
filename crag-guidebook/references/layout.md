@@ -85,8 +85,17 @@ Keep it, the axis file and the image folders next to the guide.
         "short": "until ~10:00<br><span class='small'>observed 2026-06-01</span>"
       },
       "field_notes": ["Paragraph (HTML allowed).", "…"],
-      "topos": [{"image": "topo/book_01.png", "caption": "Topo — … (personal use)"},
-                {"image": "img/photo_01a.jpg", "photo": true, "caption": "… — photo A. Visitor, 2026-06-01"}],
+      "topos": [{"image": "topo/book_01.png", "caption": "Topo — … (personal use)",
+                 "source": "book", "credit": "…", "licence": "personal use",
+                 "source_url": "", "retrieved": "2026-06-01"},
+                {"image": "img/photo_01a.jpg", "photo": true, "caption": "… — photo A. Visitor, 2026-06-01",
+                 "source": "user", "credit": "A. Visitor", "licence": "own photo", "retrieved": "2026-06-01"},
+                {"image": "topo/osm_01a.jpg", "caption": "Topo — … · Wikimedia Commons",
+                 "source": "Wikimedia Commons via OpenStreetMap (node/…)", "credit": "…",
+                 "licence": "CC BY-SA 4.0", "source_url": "https://commons.wikimedia.org/wiki/File:…",
+                 "retrieved": "…", "size": [1280, 960],
+                 "lines": [{"name": "…", "grade": "6a", "path": "0.2,0.9|0.3,0.1A",
+                            "points": [{"x": 0.2, "y": 0.9}, {"x": 0.3, "y": 0.1, "type": "anchor"}]}]}],
       "routes": [
         {"n": 1, "name": "Green Mile", "grade": "5a", "stars": 1, "length": "15 m",
          "bolts": null, "type": "sport",
@@ -113,6 +122,11 @@ Fields written by `crag_conditions.py`: `aspect`, `aspect_deg`, `bank`,
 - `local_src` also accepts `translit` (= reconstructed) and `book`/`guidebook`
   (= source); `rating` also accepts `note` (= top_pick).
 - A legacy single `topo` + `topo_caption` still works and is shown first.
+- Topo provenance (`source`, `credit`, `licence`, `source_url`, `retrieved`) is
+  required by `verify_guide.py`; `build_guide.py` appends credit and licence to a caption
+  that lacks them, draws `lines` over the image, and lists every credit in a "Topo and
+  photo credits" box on the page marked `"credits": true` (else the first front/back page
+  titled with "credits" or "sources"). See `references/topos.md`.
 - Prose fields are escaped (plain text). `field_notes`, `shade_override.sentence` and
   all `html` fields are raw HTML.
 

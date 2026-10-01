@@ -19,7 +19,7 @@ compatibility: >-
   checks), Pillow and pillow-heif (photo GPS, HEIC), matplotlib (plan maps). Web access helps
   for research.
 metadata:
-  version: 2.0.0
+  version: 1.1.0
 ---
 
 # Crag guidebook
@@ -80,9 +80,12 @@ Degraded forms:
 ### 1. Research, fanned out (P1)
 Take one source family per task: theCrag (usually the spine), the local club guide or
 site, Mountain Project / UKClimbing / 27crags, local-language news and blogs,
-OpenStreetMap. If you can run tasks in parallel, do; otherwise one after another. Each
-task reports what it **could not** get as well as what it got. Pace page loads ~10 s
-apart; on a 403, read the page as text in a real browser if you have a browser tool.
+OpenStreetMap. If the AI app has a climbing MCP tool connected (for example an
+OpenBeta server), use it first for route data; never assume one exists. If you can run
+tasks in parallel, do; otherwise one after another. Each task reports what it **could
+not** get as well as what it got. Pace page loads ~10 s apart. If a plain fetch gets a 403, you may read the
+page as text in a real browser if you have a browser tool — but if the browser is then
+blocked too (403/429, "Forbidden", a challenge page), stop that site and record the gap.
 Coordinates often hide in the page markup — search the raw HTML with a lat/lon regex.
 Read `references/sources.md` first.
 
@@ -117,10 +120,19 @@ Latin name is clearly a transliteration, reconstruct it (`local_src:
 Explain † on the How-to-read page; report the tally sourced / reconstructed / blank.
 
 ### 5. Topos (P5)
-Freely viewable topos only, at the size shown free; never bypass a paywall, login,
-bot protection or CDN block. If a site starts refusing, **stop**, record the gap, and
-let the user decide. Credit every topo. Save as `topo/<src>_<NN>[a-c].<ext>` and run
-`scripts/attach_images.py --crag crag.json --credit "<src>=<caption>"`.
+Read `references/topos.md`. Work down a fixed ladder:
+1. **OpenStreetMap + Wikimedia Commons** — `scripts/fetch_topos.py find --lat … --lon …`
+   then `fetch --objects osm.json --crag crag.json`: downloads openly licensed photos,
+   records licence and credit, and keeps any route lines drawn on them.
+2. **Official APIs** — only with the user's own key and approval (most have none open).
+3. **Images the user supplies** — guidebook photos, screenshots, URLs they have rights
+   to: save as `topo/<src>_<NN>[a-c].<ext>` and run `scripts/attach_images.py --crag
+   crag.json --credit "<src>=<caption>" --author "<src>=<who>" --licence "<src>=<licence>"`.
+
+Every topo records `source`, `licence`, `credit`, `source_url`, `retrieved`. Never
+bypass a paywall, login, bot protection or CDN block; at the first 403/429/challenge
+**stop**, record the gap in HANDOVER and let the user decide. NC or unknown licences:
+personal use only, after the user confirms.
 
 ### 6. Aspect and shade (P6)
 Run `scripts/crag_conditions.py --crag crag.json --axis file --axis-file axis.json`
@@ -171,8 +183,8 @@ map app it pins every sector on satellite imagery, on a phone.
 ### 9. Verify (P9)
 Run `scripts/verify_guide.py --guide <pdf|html> --crag crag.json` (add `--baseline
 old/crag.json` when revising). It checks shade wording, I1–I8, overrides, parking,
-Approaches, top pick, Important-first and HTML self-containment. Then **look**: cover,
-contents, Important page, a dense and a sparse sector, every sector with field notes
+Approaches, top pick, Important-first, HTML self-containment and that every topo has a
+credit and licence. Then **look**: cover, contents, Important page, a dense and a sparse sector, every sector with field notes
 or an override, the index. Check that coordinates plot inside the crag and that derived
 numbers (draws, rope) match the prose.
 
@@ -213,7 +225,7 @@ limitation: it reads only PDFs this skill rendered with WeasyPrint.
 - **Both readings, one spine.** Never average grades; a visitor's opinion goes in a
   note.
 - **† over blank** when the transliteration is clear; **blank over wrong** when not.
-- **Free topos only; stop on a block.** The gap is recoverable later.
+- **Free topos only, credited; stop on a block.** The gap is recoverable later.
 - **No source file → rebuild it (mode C), never patch the PDF.**
 - **Keep the old edition.** New editions get `_v2`, `_v3`.
 - **Ask before installing** anything, and before sharing photos with plates or faces.
@@ -231,6 +243,7 @@ limitation: it reads only PDFs this skill rendered with WeasyPrint.
 | `parse_guide_pdf.py` | mode C: this skill's PDF → `crag.json` draft | PyMuPDF |
 | `photo_gps.py` | EXIF GPS/time from JPG/HEIC; `--to-jpg` | Pillow (+ pillow-heif) |
 | `attach_images.py` | add `topo/` and `img/` files by naming convention | stdlib |
+| `fetch_topos.py` | `find` OSM climbing objects; `fetch` Commons photos + credits + route lines | stdlib, web |
 | `guide_style.py` | shared style keys and the shade rule (module, not a CLI) | — |
 
 ## References
@@ -243,6 +256,8 @@ limitation: it reads only PDFs this skill rendered with WeasyPrint.
   HTML fallback, WeasyPrint gotchas, verifying. Read before filling `crag.json`.
 - `references/conditions.md` — F1–F3, the shade rule with a worked example, the
   caveat, cross-checking, overrides, the planning page.
+- `references/topos.md` — the topo source ladder, provenance fields, the optional MCP
+  rule, the OSM route-line format. Read before adding topos or photos.
 - `references/field-notes.md` — mode B in full.
 - `references/rebuild-from-pdf.md` — mode C: style keys, parser traps, limitation.
 - `references/handover.md` — HANDOVER.md and decisions-log templates.

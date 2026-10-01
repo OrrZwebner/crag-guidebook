@@ -147,6 +147,99 @@ def sector_images(s):
     return out
 
 
+def topo_caption(t, s):
+    """The caption, with credit and licence appended when the caption lacks them."""
+    cap = t.get('caption') or '%s — %s' % ('Photo' if t.get('photo') else 'Topo', s['name'])
+    extra = [str(t[k]) for k in ('credit', 'licence')
+             if t.get(k) and str(t[k]).lower() not in cap.lower()]
+    return ' · '.join([cap] + extra)
+
+
+def lines_svg(t):
+    """Route lines from OSM wikimedia_commons:path (fractions of width/height, see
+    references/topos.md) as an SVG laid over the image; '' when there is nothing to draw."""
+    lines = [ln for ln in (t.get('lines') or []) if len(ln.get('points') or []) > 1]
+    size = t.get('size') or [1000, 1000]
+    if not lines:
+        return ''
+    w, h = float(size[0]), float(size[1])
+    sw = max(w, h) / 220.0
+    out = []
+    for ln in lines:
+        pts = ln['points']
+        for a, b in zip(pts, pts[1:]):
+            out.append('<line x1="%.1f" y1="%.1f" x2="%.1f" y2="%.1f" stroke="#e8262b" '
+                       'stroke-width="%.1f" stroke-linecap="round"%s/>'
+                       % (a['x'] * w, a['y'] * h, b['x'] * w, b['y'] * h, sw,
+                          ' stroke-dasharray="%.1f %.1f"' % (3 * sw, 2 * sw)
+                          if b.get('dotted_before') else ''))
+        for p in pts:
+            if p.get('type') == 'anchor':
+                out.append('<circle cx="%.1f" cy="%.1f" r="%.1f" fill="none" stroke="#e8262b" '
+                           'stroke-width="%.1f"/>' % (p['x'] * w, p['y'] * h, 2.2 * sw, sw * .8))
+            elif p.get('type'):
+                out.append('<circle cx="%.1f" cy="%.1f" r="%.1f" fill="#ffffff" stroke="#e8262b" '
+                           'stroke-width="%.1f"/>' % (p['x'] * w, p['y'] * h, 1.3 * sw, sw * .6))
+        if ln.get('name'):
+            p = pts[0]
+            out.append('<text x="%.1f" y="%.1f" font-size="%.1f" fill="#ffffff" stroke="#e8262b" '
+                       'stroke-width="%.1f" paint-order="stroke">%s</text>'
+                       % (p['x'] * w + 2 * sw, min(p['y'] * h, h - sw), 7 * sw, sw * .6,
+                          e(ln['name'])))
+    return ('<svg class="tlines" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d" '
+            'preserveAspectRatio="none" style="position:absolute;left:0;top:0;'
+            'width:100%%;height:100%%">%s</svg>' % (w, h, ''.join(out)))
+
+
+def topo_figure(t, img):
+    over = lines_svg(t)
+    if not over:
+        return '<img src="%s">' % img(t['image'])
+    w, h = (t.get('size') or [1000, 1000])[:2]
+    cap_mm = (150.0 if t.get('photo') else 118.0) * float(w) / float(h)  # = the CSS max-height
+    return ('<div class="tbox" style="position:relative;width:100%%;max-width:%.1fmm">'
+            '<img src="%s" style="display:block;width:100%%;max-height:none">%s</div>'
+            % (cap_mm, img(t['image']), over))
+
+
+def credits_list(crag):
+    """Credits for every topo and photo that records one, for the sources/credits page."""
+    seen, items = set(), []
+    for s in crag['sectors']:
+        for t in sector_images(s):
+            if not (t.get('credit') or t.get('licence')):
+                continue
+            key = (t.get('credit'), t.get('licence'), t.get('source_url'))
+            if key in seen:
+                continue
+            seen.add(key)
+            what = ' · '.join(x for x in (t.get('credit'), t.get('licence'), t.get('source'))
+                              if x)
+            url = t.get('source_url')
+            items.append('<li>§%s %s%s</li>' % (e(s.get('n', '')), e(what),
+                                                (' — %s' % e(url)) if url else ''))
+    if not items:
+        return ''
+    osm = any('openstreetmap' in str(t.get('source', '')).lower()
+              for s in crag['sectors'] for t in sector_images(s))
+    note = ('<p class="small">Map and route data © OpenStreetMap contributors (ODbL).</p>'
+            if osm else '')
+    return ('<div class="box credits"><div class="boxh">Topo and photo credits</div>'
+            '<ul class="small">%s</ul>%s</div>' % (''.join(items), note))
+
+
+def credits_page_index(pages):
+    """The page marked "credits": true, else the first titled credits/sources."""
+    for i, p in enumerate(pages):
+        if p.get('credits'):
+            return i
+    for i, p in enumerate(pages):
+        if re.search(r'credit|sources', '%s %s' % (p.get('title', ''), p.get('kicker', '')),
+                     re.I):
+            return i
+    return None
+
+
 def sector_html(s, meta, img):
     facts = [('GPS', '%.6f, %.6f' % (s['lat'], s['lon']))]
     if s.get('parking'):
@@ -198,9 +291,9 @@ def sector_html(s, meta, img):
         prose.append('<h3>How busy</h3><p>%s</p>' % e(s['busy']))
 
     topo = ''.join(
-        '<div class="topo%s"><img src="%s"><div class="cap">%s</div></div>'
-        % (' photo' if t.get('photo') else '', img(t['image']),
-           e(t.get('caption') or 'Topo — %s' % s['name']))
+        '<div class="topo%s">%s<div class="cap">%s</div></div>'
+        % (' photo' if t.get('photo') else '', topo_figure(t, img),
+           e(topo_caption(t, s)))
         for t in sector_images(s))
 
     sub = ' · '.join(x for x in (s.get('local_name'), s.get('en')) if x)
@@ -462,10 +555,14 @@ def assemble(crag, css, img, html_mode):
     if not crag.get('_no_contents'):
         parts.append(contents_html(crag, html_mode))
     fronts = crag.get('front_pages', [])
+    backs = crag.get('back_pages', [])
     box = approaches_box(meta)
     target = next((i for i, p in enumerate(fronts) if p.get('approaches')), len(fronts) - 1)
+    cred = credits_list(crag)
+    ci = credits_page_index(fronts + backs) if cred else None
     for i, p in enumerate(fronts):
-        parts.append(free_page(p, crag, box if (box and i == target) else ''))
+        extra = (box if (box and i == target) else '') + (cred if ci == i else '')
+        parts.append(free_page(p, crag, extra))
     if box and not fronts:
         parts.append(free_page({'kicker': 'The crag', 'title': 'Approaches'}, crag, box))
     parts.append(map_pages(crag, img))
@@ -473,8 +570,8 @@ def assemble(crag, css, img, html_mode):
         parts.append(free_page(p, crag))
     for s in crag['sectors']:
         parts.append(sector_html(s, meta, img))
-    for p in crag.get('back_pages', []):
-        parts.append(free_page(p, crag))
+    for i, p in enumerate(backs):
+        parts.append(free_page(p, crag, cred if ci == len(fronts) + i else ''))
     if not crag.get('_no_index'):
         parts.append(index_page(crag))
     return ('<!doctype html><html lang="en"%s><head><meta charset="utf-8">'

@@ -19,6 +19,8 @@ Start a new chat and ask, for example:
 - "Here are photos of the guidebook pages. The sources disagree — sort them out and tell me when each sector is in the shade."
 - "Add my notes and photos from my visit to the guide you made last time."
 
+Optional: if your AI app can connect MCP servers, connecting OpenBeta (https://github.com/jacKlinc/openbeta-mcp) gives it extra route data.
+
 You get back the guide as a PDF — or, if the app can't make PDFs, an HTML file: open it in your browser, choose **Print → Save as PDF** (A4, background graphics on). You also get map files (KML for Google Earth or My Maps, GPX for a phone GPS app, and a CSV spreadsheet) and the guide's source file, so it can be updated later.
 
 Shade times are calculated and approximate; the guide says so, and prints first-hand observations instead where someone has checked.

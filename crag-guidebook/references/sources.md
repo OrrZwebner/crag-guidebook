@@ -150,8 +150,10 @@ Database sites frequently block automated fetchers while serving browsers fine,
 and they rate-limit aggressively.
 
 - Try the normal fetch tool first.
-- On 403s, use a real browser if one is available, reading pages as text rather
-  than screenshots.
+- If a plain fetch gets a 403, use a real browser if one is available, reading pages
+  as text rather than screenshots. If the browser is blocked too (403/429, "Forbidden",
+  a challenge page), stop using that site for this guide and record the gap — never
+  work around bot protection.
 - **Pace it.** Roughly ten seconds between page loads avoids the throttle that a
   burst will trigger. Getting throttled costs far more time than pacing does.
 - Fan out across sources in parallel, but keep each agent to one source so one
@@ -261,6 +263,9 @@ Each route and sector can carry `local_name` with `local_src`:
   blank (identity I4; `verify_guide.py` checks it).
 
 ## Collecting topos: etiquette
+
+The source ladder (OpenStreetMap + Commons first, then official APIs with the user's own
+key, then the user's own images) and the provenance fields are in `references/topos.md`.
 
 - Use only topos that are **freely viewable**. Where a full-size or high-resolution
   view sits behind a paid tier, save the freely displayed image at the size it is

@@ -21,13 +21,15 @@ Checks (each reported as pass/fail with detail):
   top_pick               the top-pick symbol is printed iff a route has rating top_pick
   important_first        the first front page is "Important before you go" and printed
   html_self_contained    (HTML only) no external src/href; every <img> is a data: URI
+  image_credits          every topo/photo in crag.json has a non-empty credit and licence;
+                         warns (does not fail) on "own photo" / "personal use" licences
 
 Usage
 -----
   python3 scripts/verify_guide.py --guide guide.pdf --crag crag.json
   python3 scripts/verify_guide.py --guide guide.html --crag crag.json --baseline old/crag.json
 
-Prints {"checks": [{"name", "pass", "detail"}], "all_pass": bool}; exit 0 if all pass,
+Prints {"checks": [{"name", "pass", "detail"}], "all_pass": bool, "warnings": [...]}; exit 0 if all pass,
 1 otherwise, 3 if a PDF cannot be read (PyMuPDF missing and no pdftotext).
 """
 
@@ -284,9 +286,22 @@ def main():
         check('html_self_contained', not ext and not nondata,
               '%d external refs, %d non-data images' % (len(ext), len(nondata)))
 
+    nocred, warnings = [], []
+    for s in sectors:
+        imgs = list(s.get('topos') or [])
+        if s.get('topo'):
+            imgs.insert(0, {'image': s['topo']})
+        for t in imgs:
+            if not (str(t.get('credit') or '').strip() and str(t.get('licence') or '').strip()):
+                nocred.append('%s:%s' % (s['n'], t.get('image')))
+            elif re.search(r'own photo|personal use', str(t['licence']), re.I):
+                warnings.append('sector %s %s: licence "%s" — keep the guide for personal '
+                                'use; do not publish it' % (s['n'], t.get('image'), t['licence']))
+    check('image_credits', not nocred, 'missing credit or licence: %s' % nocred)
+
     all_pass = all(c['pass'] for c in checks)
     print(json.dumps({'guide': args.guide, 'renderer': 'html' if is_html else 'pdf',
-                      'checks': checks, 'all_pass': all_pass,
+                      'checks': checks, 'all_pass': all_pass, 'warnings': warnings,
                       'next_step': 'Also look at the pages: cover, contents, the Important page, '
                                    'a dense and a sparse sector, every sector with field notes '
                                    'or an override, and the index.'},
