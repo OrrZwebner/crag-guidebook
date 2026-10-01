@@ -19,7 +19,7 @@ compatibility: >-
   checks), Pillow and pillow-heif (photo GPS, HEIC), matplotlib (plan maps). Web access helps
   for research.
 metadata:
-  version: 1.2.0
+  version: 1.2.1
 ---
 
 # Crag guidebook
