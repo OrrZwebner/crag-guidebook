@@ -1,0 +1,25 @@
+{
+ "_how_derived": "By hand from examples/crag.json, independently of the scripts. Daylight 07:00-19:00 = 720 min. Sector 1 sun 09:00-13:00: shade 120 min before + 360 min after -> longer (after) leads. Sector 2 sun 14:00-18:50: 420 min before, 10 min after (< 15 min, dropped). Sector 3 no sun. Sector 4 has an observed override. Axis is the meridian -20.0: sectors at lon -20.001 are on the west bank and face east (90), sectors at -19.999 face west (270); sector 3 has aspect_manual 180. EXIF: 30 deg 0' 9.0\" S = -30.0025, 19 deg 59' 51.0\" W = -19.9975.",
+ "routes_total": 12,
+ "routes_per_sector": {"1": 4, "2": 3, "3": 3, "4": 2},
+ "daylight_min": 720,
+ "headlines": {
+  "1": "Shade (climbable) after 13:00 · also before 09:00",
+  "2": "Shade (climbable) until 14:00",
+  "3": "Shade all day",
+  "4": "Shade (observed 2026-06-01): until about 10:00 · afternoon not observed"
+ },
+ "csv_shade": {
+  "1": "shade after 13:00, and before 09:00",
+  "2": "shade until 14:00",
+  "3": "shade all day",
+  "4": "until ~10:00 observed 2026-06-01"
+ },
+ "local_tally": {"source": 1, "reconstructed": 1, "blank": 10},
+ "field_note_sectors": [2],
+ "top_picks": 1,
+ "parking_pins": 1,
+ "images_wanted": 5,
+ "aspects_after_axis": {"1": 90, "2": 270, "3": 180, "4": 270},
+ "photo_gps": {"lat": -30.0025, "lon": -19.9975, "altitude_m": 12.0}
+}

@@ -1,0 +1,225 @@
+{
+ "_about": "SYNTHETIC test crag. Every name, person, route and coordinate is invented; the coordinates sit in the open South Atlantic, far from any land. Sun windows and sunrise/sunset are hand-set so the shade arithmetic can be checked by hand.",
+ "crag": {
+  "name": "Hollowmere Gorge",
+  "subtitle": "A fictional crag used to test this skill",
+  "country": "Nowhere (fictional)",
+  "year": 2026,
+  "month_label": "June",
+  "tz_offset": 0,
+  "conditions_date": "2026-06-15",
+  "horizon_deg": 15,
+  "spine_total": 12,
+  "field_notes_by": "A. Visitor",
+  "field_notes_date": "2026-06-01",
+  "top_pick_symbol": "♪",
+  "top_pick_label": "Visitor's top pick",
+  "approach_tips": [
+   "Most approaches are steep: use the dry streambed rather than scrambling straight up.",
+   "Park only in the marked lay-by; the verge is soft after rain."
+  ],
+  "conditions_meta": {
+   "date": "2026-06-15",
+   "tz_offset": 0,
+   "horizon_deg": 15,
+   "axis": "hand-set for the test fixture",
+   "sunrise": "07:00",
+   "sunset": "19:00",
+   "solar_noon": "13:00",
+   "max_elevation": 60.0
+  }
+ },
+ "contents_title": "The four sectors at a glance",
+ "cover": {
+  "image": "img/cover.png",
+  "tag": "Fictional test crag",
+  "title_html": "Mini guide:<br>Hollowmere Gorge",
+  "blurb": "A synthetic guide used to test the crag-guidebook skill: 4 sectors, 12 invented routes, calculated June shade, and field notes from an invented visit. Nothing here is real."
+ },
+ "front_pages": [
+  {
+   "kicker": "Read this first",
+   "title": "Important before you go",
+   "html": "<div class='imp'><div class='boxh'>Read this first</div><ol><li><b>Shade times are calculated and approximate.</b> They come from each wall's aspect and the sun's position; a first-hand observation overrides them where marked.</li><li><b>Wear a helmet.</b> <span class='mine'>Loose blocks at the top of several routes (A. Visitor).</span></li><li><b>Anchors.</b> Most anchors are two bolts with plain rings.</li><li><b>Approaches.</b> Use the dry streambed.</li></ol></div>"
+  },
+  {
+   "kicker": "About this guide",
+   "title": "Sources and method",
+   "html": "<div class='two'><h3>Why this guide exists</h3><p>It exists to test the skill. The spine source is the invented Example Database; the invented Example Printed Guide supplies local names and one topo.</p><div class='box'><div class='boxh'>What this guide is not</div><p>A survey. Nothing here has been checked on the ground except the marked field notes.</p></div></div>"
+  },
+  {
+   "kicker": "How to read this guide",
+   "title": "Grades, stars, names and shade",
+   "html": "<div class='two'><h3>Stars and the top pick</h3><p>Stars 0–3 from the spine. <span class='pick'>♪</span> is the visitor's personal top pick.</p><h3>Local names</h3><p>Names marked <span class='dag'>†</span> are reconstructed from the Latin name and may differ from the rock.</p><h3>Shade — when you can climb</h3><p>Shade is the complement of the calculated sun window within daylight (07:00–19:00 on 15 June).</p></div>"
+  },
+  {
+   "kicker": "The crag",
+   "title": "Hollowmere Gorge",
+   "approaches": true,
+   "html": "<div class='two'><p>A short invented gorge with four sectors on alternating banks of a north–south stream.</p><div class='box'><div class='boxh'>Bolt condition</div><p>One of four sectors flagged, one caution, two unknown. Unknown is not a clean bill of health.</p></div></div>"
+  }
+ ],
+ "maps": [
+  {
+   "kicker": "Overview · sectors 1–4",
+   "title": "The gorge",
+   "image": "img/map.png",
+   "caption": "Placeholder map for the test fixture.",
+   "sectors": [1, 2, 3, 4],
+   "html": "<p>Sectors alternate banks from north to south.</p>"
+  }
+ ],
+ "mid_pages": [
+  {
+   "kicker": "Planning",
+   "title": "A June day — where the shade is",
+   "generate": "shade_planning",
+   "html": "<div class='box'><div class='boxh'>If you have one day</div><p>Owl Buttress in the morning, Lichen Slab after 13:00.</p></div>"
+  }
+ ],
+ "back_pages": [
+  {
+   "kicker": "Appendix",
+   "title": "Contradictions between the sources",
+   "html": "<table class='tbl'><tr><th>Subject</th><th>Disagreement</th><th>What this guide did</th></tr><tr><td>Heron Wall shade</td><td>Calculated: shade until 13:00. Observed 2026-06-01: in the sun by 10:00.</td><td>Observation wins; calculation kept visible and marked contradicted.</td></tr><tr class='alt'><td>Long Neck grade</td><td>Database 7a; printed guide VIII (≈ 7a).</td><td>Both printed.</td></tr></table>"
+  }
+ ],
+ "sectors": [
+  {
+   "n": 1,
+   "name": "Lichen Slab",
+   "local_name": "Skofnahella",
+   "en": "Lichen slab",
+   "lat": -30.0,
+   "lon": -20.001,
+   "parking": [-29.9995, -20.002],
+   "asl": "40 m",
+   "routes_count": 4,
+   "ticks": 120,
+   "grades": "5a–6b",
+   "height": "20 m",
+   "qd": "8",
+   "bolted": "2001",
+   "bolt_status": "One route flagged: loose rock",
+   "bolt_severity": 2,
+   "aspect": "E",
+   "aspect_deg": 90,
+   "bank": "West",
+   "aspect_confidence": "high",
+   "sun": ["09:00", "13:00"],
+   "intro": "A friendly slab on the west bank, first on the left as you enter.",
+   "climbing": "Slabby, technical, small edges.",
+   "gear": "8 quickdraws; a 60 m rope is enough.",
+   "approach": "From the lay-by, follow the streambed for 2 minutes.",
+   "walk": "2 min",
+   "busy": "The busiest sector.",
+   "topos": [{"image": "topo/book_01.png", "caption": "Topo — from the invented Example Printed Guide (personal use)"}],
+   "routes": [
+    {"n": 1, "name": "Green Mile", "grade": "5a", "stars": 1, "length": "15 m", "local_name": "Grænmíla", "local_src": "source"},
+    {"n": 2, "name": "Moss Piston", "grade": "6a", "stars": 2, "length": "18 m", "local_name": "Mosastimpill", "local_src": "reconstructed"},
+    {"n": 3, "name": "Drizzle", "grade": "5c", "stars": null, "length": "20 m", "note": "LOOSE ROCK at the top"},
+    {"n": 4, "name": "Slab Happy", "grade": "6b", "stars": 0, "length": "20 m"}
+   ]
+  },
+  {
+   "n": 2,
+   "name": "Owl Buttress",
+   "lat": -30.002,
+   "lon": -19.999,
+   "asl": "45 m",
+   "routes_count": 3,
+   "ticks": 60,
+   "grades": "6a+–6c",
+   "height": "25 m",
+   "qd": "11",
+   "bolted": "2001",
+   "bolt_status": "No reports",
+   "bolt_severity": 1,
+   "aspect": "W",
+   "aspect_deg": 270,
+   "bank": "East",
+   "aspect_confidence": "high",
+   "sun": ["14:00", "18:50"],
+   "intro": "A steep buttress on the east bank with the best rock in the gorge.",
+   "climbing": "Steep pockets.",
+   "gear": "11 quickdraws.",
+   "approach": "Cross the stream at the stepping stones.",
+   "walk": "5 min",
+   "field_notes": [
+    "Flat, shaded base; good for a group.",
+    "New-looking bolts on Night Shift."
+   ],
+   "topos": [{"image": "img/photo_02a.jpg", "photo": true, "caption": "Owl Buttress from below — photo A. Visitor, 2026-06-01"}],
+   "routes": [
+    {"n": 1, "name": "Night Shift", "grade": "6c", "stars": 3, "length": "25 m", "bolts": 9, "rating": "top_pick", "field_note": "Best route of the trip; felt closer to 6c+ (spine: 3 stars)."},
+    {"n": 2, "name": "Feathers", "grade": "6a+", "stars": 2, "length": "22 m", "fa": "I. Nvented, 2001"},
+    {"n": 3, "name": "Pellet", "grade": "6b", "stars": 1, "length": "18 m", "type": "trad"}
+   ]
+  },
+  {
+   "n": 3,
+   "name": "Cold Corner",
+   "lat": -30.004,
+   "lon": -20.001,
+   "asl": "50 m",
+   "routes_count": 3,
+   "ticks": 0,
+   "grades": "5b–6a",
+   "height": "15 m",
+   "qd": "7",
+   "bolted": "1998",
+   "bolt_status": "No reports · 1998 gear",
+   "bolt_severity": 1,
+   "aspect": "S",
+   "aspect_deg": 180,
+   "aspect_manual": 180,
+   "bank": "stated",
+   "aspect_confidence": "high",
+   "sun": null,
+   "intro": "A deep, south-facing corner that never sees the sun in June.",
+   "approach": "Continue up the streambed past Owl Buttress.",
+   "walk": "7 min",
+   "routes": [
+    {"n": 1, "name": "Frost", "grade": "5b", "stars": 1, "length": "12 m"},
+    {"n": 2, "name": "Icicle", "grade": "5c", "stars": 2, "length": "14 m"},
+    {"n": 3, "name": "Rime", "grade": "6a", "stars": 3, "length": "15 m"}
+   ]
+  },
+  {
+   "n": 4,
+   "name": "Heron Wall",
+   "lat": -30.006,
+   "lon": -19.999,
+   "asl": "55 m",
+   "routes_count": 2,
+   "ticks": 15,
+   "grades": "6c+–7a",
+   "height": "30 m",
+   "qd": "12",
+   "bolted": "2001",
+   "bolt_status": "One route needs rebolting",
+   "bolt_severity": 3,
+   "aspect": "W",
+   "aspect_deg": 270,
+   "bank": "East",
+   "aspect_confidence": "high",
+   "sun": ["13:00", "18:00"],
+   "shade_override": {
+    "headline": "Shade (observed 2026-06-01): until about 10:00 · afternoon not observed",
+    "sentence": "By calculation the wall faces <b>W</b> and would stay in shade until about 13:00. <b>That is not what happens.</b> <span class='mine'>On 2026-06-01 the sun was on the wall by about 10:00; the afternoon was not observed (A. Visitor).</span> Treat the calculated aspect as unreliable.",
+    "table": "<b>until ~10:00</b><div class='tgr'>observed 2026-06-01 · calc. said 13:00</div>",
+    "short": "until ~10:00<br><span class='small'>observed 2026-06-01</span>"
+   },
+   "intro": "The tallest wall, high on the east bank.",
+   "gear": "12 quickdraws; 70 m rope.",
+   "warn": "Wader needs rebolting: two spinning bolts reported.",
+   "approach": "Steep scramble from the end of the streambed.",
+   "walk": "10 min",
+   "topos": [{"image": "topo/book_04.png", "caption": "Topo — from the invented Example Printed Guide (personal use)"}],
+   "routes": [
+    {"n": 1, "name": "Long Neck", "grade": "7a", "stars": 2, "length": "30 m", "xref": "Book #12 · VIII · ★★"},
+    {"n": 2, "name": "Wader", "grade": "6c+", "stars": 1, "length": "28 m", "note": "REBOLT needed — two spinners"}
+   ]
+  }
+ ]
+}

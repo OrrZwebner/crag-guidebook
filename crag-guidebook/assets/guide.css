@@ -1,0 +1,232 @@
+/* ------------------------------------------------------------------
+   guide.css — house style for crag guidebooks (PDF via WeasyPrint, or browser print).
+
+   Serif throughout, black rules, a single warm accent for hazards. Route rows
+   are flat lists rather than a bordered grid, which reads faster at small sizes
+   and survives a column break without losing its header.
+
+   WeasyPrint notes that cost real time to learn, so do not undo them casually:
+     * Flexbox does NOT fragment across pages. A tall flex row silently spills
+       and leaves half-blank pages. Anything that can overflow a page uses CSS
+       multi-column (`column-count`), which does fragment correctly.
+     * Side-by-side blocks that must stay on one page (a map beside its caption)
+       use a plain <table>, which WeasyPrint lays out predictably.
+     * `target-counter(attr(href), page)` resolves live page numbers in the
+       contents table. That is why the contents can be generated before the page
+       count is known.
+   ------------------------------------------------------------------ */
+
+@page {
+  size: A4;
+  margin: 15mm 14mm 14mm 14mm;
+  @bottom-right {
+    content: counter(page);
+    font-family: 'Bitstream Charter', 'DejaVu Serif', serif;
+    font-size: 8pt;
+    color: #888;
+  }
+}
+@page :first { margin: 0; @bottom-right { content: ''; } }
+
+@page landscape {
+  size: A4 landscape;
+  margin: 12mm 12mm 11mm 12mm;
+  @bottom-right {
+    content: counter(page);
+    font-family: 'Bitstream Charter', 'DejaVu Serif', serif;
+    font-size: 8pt;
+    color: #888;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: 'Bitstream Charter', 'DejaVu Serif', serif;
+  font-size: 8.6pt;
+  line-height: 1.42;
+  color: #141414;
+  margin: 0;
+}
+h1, h2, h3, h4 { font-family: inherit; margin: 0; }
+p { margin: 0 0 2.4mm; }
+ul { margin: 0 0 2.4mm; padding-left: 4.2mm; }
+li { margin-bottom: 1mm; }
+a { color: #9c3317; text-decoration: none; }
+.small { font-size: 7.4pt; color: #555; }
+
+/* ----------------------------------------------------------- cover */
+.cover { page-break-after: always; height: 297mm; width: 210mm;
+         position: relative; background: #12160f; color: #fff; }
+.cover .cimg { position: absolute; inset: 0; }
+.cover .cimg img { width: 100%; height: 100%; object-fit: cover; opacity: .62; }
+.cover .cgrad { position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(10,12,8,.25) 0%,
+              rgba(10,12,8,.55) 45%, rgba(10,12,8,.94) 100%); }
+.cover .ctxt { position: absolute; left: 20mm; right: 20mm; bottom: 26mm; }
+.cover h1 { font-size: 34pt; line-height: 1.03; font-weight: 700; letter-spacing: -.3pt; }
+.cover .cyear { font-size: 22pt; color: #c9c4b4; margin-top: 2mm; }
+.cover .csub { margin-top: 7mm; font-size: 10pt; color: #e3e0d5;
+               max-width: 120mm; line-height: 1.5; }
+.cover .ctag { position: absolute; left: 20mm; top: 20mm; font-size: 8.5pt;
+  letter-spacing: 2.2pt; text-transform: uppercase; color: #e9e5d8;
+  border: 1px solid rgba(255,255,255,.45); padding: 2mm 4mm; }
+
+/* ------------------------------------------------------- generic page */
+.page { page-break-after: always; }
+.page:last-child { page-break-after: auto; }
+.landscape { page: landscape; page-break-after: always; }
+h2.ph { font-size: 19pt; margin: 0 0 1mm; letter-spacing: -.2pt; }
+.phk { font-size: 7.6pt; letter-spacing: 2pt; text-transform: uppercase;
+       color: #8a8a8a; margin-bottom: 1.5mm; }
+.rule { height: 2.2pt; background: #141414; margin: 2.5mm 0 4mm; }
+h3 { font-size: 9.4pt; margin: 3.6mm 0 1.2mm; }
+.wt { font-weight: 400; font-size: 8pt; color: #777; }
+
+.two { column-count: 2; column-gap: 7mm; }
+.two h3 { break-after: avoid; }
+.two .box { break-inside: avoid; }
+
+.box { border: 1pt solid #d8d3c6; background: #faf8f3; padding: 3mm 3.4mm;
+       margin: 3mm 0; font-size: 8pt; }
+.boxh { font-size: 6.8pt; letter-spacing: 1.6pt; text-transform: uppercase;
+        color: #8a8a8a; font-weight: 700; margin-bottom: 1.2mm; }
+
+/* ------------------------------------------------------------ tables */
+.tbl { width: 100%; border-collapse: collapse; font-size: 7.6pt; break-inside: auto; }
+.tbl tr { break-inside: avoid; }
+.tbl th { text-align: left; border-bottom: 1pt solid #141414; padding: 1.3mm 1.6mm;
+  font-size: 6.6pt; letter-spacing: 1.2pt; text-transform: uppercase; color: #8a8a8a; }
+.tbl td { border-bottom: .4pt solid #e0e0e0; padding: 1.3mm 1.6mm; vertical-align: top; }
+.tbl tr.alt td { background: #faf8f3; }
+
+/* ------------------------------------------------------------ sector */
+.sector { page-break-before: always; }
+.shead { display: flex; align-items: flex-start; gap: 4mm;
+         border-bottom: 2.2pt solid #141414; padding-bottom: 3mm; }
+.sbadge { width: 11mm; height: 11mm; background: #141414; color: #fff;
+  font-size: 15pt; font-weight: 700; display: flex; align-items: center;
+  justify-content: center; flex: 0 0 11mm; }
+.stitles { flex: 1 1 auto; }
+.skicker { font-size: 7.2pt; letter-spacing: 1.9pt; text-transform: uppercase; color: #8a8a8a; }
+.shead h1 { font-size: 20pt; line-height: 1.05; letter-spacing: -.3pt; }
+.sgr { font-size: 9.6pt; color: #666; margin-top: .6mm; }
+.sfacts { flex: 0 0 62mm; font-size: 7.4pt; color: #333; line-height: 1.55; text-align: right; }
+.sfacts span { color: #8a8a8a; text-transform: uppercase; letter-spacing: .7pt; font-size: 6.4pt; }
+
+.shade { margin: 2.6mm 0 3.4mm; background: #f2efe6; border-left: 2.4pt solid #c8442a;
+         padding: 1.8mm 3mm; font-size: 8pt; }
+
+.prose { column-count: 2; column-gap: 7mm; margin-bottom: 4mm; }
+.prose h3 { break-after: avoid; }
+
+.warn { border: 1pt solid #c8442a; background: #fdf4f1; padding: 2mm 2.6mm;
+        margin: 3mm 0; font-size: 7.8pt; break-inside: avoid; }
+.warnh { font-size: 6.8pt; letter-spacing: 1.6pt; text-transform: uppercase;
+         color: #c8442a; font-weight: 700; margin-bottom: .8mm; }
+
+/* -------------------------------------------------------- route list */
+.rthead { display: flex; font-size: 6.4pt; letter-spacing: .9pt; text-transform: uppercase;
+  color: #8a8a8a; border-bottom: 1pt solid #141414; padding-bottom: 1mm; margin-bottom: 1mm; }
+.rlist { column-count: 2; column-gap: 7mm; }
+.rlist .rt { break-inside: avoid; }
+.rt { display: flex; align-items: flex-start; border-bottom: .4pt solid #ddd;
+      padding: 1.3mm 0; }
+.rt.warnrt { background: #fdf4f1; }
+.rn { flex: 0 0 6.5mm; font-size: 7.2pt; font-weight: 700; color: #fff; background: #141414;
+      width: 4.6mm; height: 4.6mm; border-radius: 50%; text-align: center;
+      line-height: 4.6mm; margin-top: .4mm; }
+.rthead .rn { background: none; }
+.rb { flex: 1 1 auto; padding-right: 2mm; }
+.rname { font-size: 8.2pt; font-weight: 700; }
+.rmeta { font-size: 6.8pt; color: #767676; line-height: 1.35; }
+.rnote { font-size: 6.8pt; color: #9c3317; line-height: 1.35; }
+.rxref { font-size: 6.4pt; color: #3f6b3f; line-height: 1.35; }
+.rs { flex: 0 0 8mm; text-align: right; font-size: 7.6pt; }
+.rg { flex: 0 0 14mm; text-align: right; font-size: 8.2pt; font-weight: 700; }
+.rl { flex: 0 0 13mm; text-align: right; font-size: 7.6pt; color: #555; }
+.st { color: #c8442a; }
+.nost { color: #bbb; }
+
+/* ------------------------------------------------------------- topo */
+.topo { margin-top: 4mm; break-inside: avoid; }
+.topo img { width: 100%; max-height: 118mm; object-fit: contain; }
+.cap { font-size: 6.6pt; color: #8a8a8a; margin-top: 1mm; }
+
+/* ------------------------------------------------------- map layout */
+.mapwrap { width: 100%; border-collapse: collapse; }
+.mapwrap td { vertical-align: top; padding: 0; }
+.mapwrap td.mc1 { width: 90mm; padding-right: 6mm; }
+.mapimg { margin: 0; }
+.mapimg img { width: 100%; }
+
+/* ---------------------------------------------------------- contents */
+.toc { width: 100%; border-collapse: collapse; font-size: 6.9pt; }
+.toc th { text-align: left; border-bottom: 1.2pt solid #141414; padding: 1.6mm 1.4mm;
+  font-size: 6pt; letter-spacing: .9pt; text-transform: uppercase; color: #777;
+  vertical-align: bottom; }
+.toc td { border-bottom: .4pt solid #e2e2e2; padding: 1.5mm 1.4mm; vertical-align: top; }
+.toc tr { break-inside: avoid; }
+.toc tr.alt td { background: #faf8f3; }
+.toc .tn { font-weight: 700; font-size: 8pt; }
+.toc .tname { font-weight: 700; font-size: 8pt; }
+.toc .tgr { color: #888; font-size: 6.2pt; }
+.toc .pg { font-weight: 700; font-size: 8.5pt; text-align: right; }
+.toc .pg a { color: #141414; }
+.toc .pg a::after { content: target-counter(attr(href), page); }
+.toc .num { text-align: right; white-space: nowrap; }
+.tlegend { font-size: 6.6pt; color: #666; margin-top: 3mm; line-height: 1.5; }
+
+/* severity colours, shared by the contents table and sector headers */
+.sev0 { color: #2f6b34; font-weight: 700; }   /* new or documented maintenance */
+.sev1 { color: #8a8a8a; }                     /* nothing recorded — not "fine"  */
+.sev2 { color: #b26a10; font-weight: 700; }   /* run-outs, partial concerns      */
+.sev3 { color: #c8442a; font-weight: 700; }   /* rebolting / bad bolting flagged */
+
+.bar { display: inline-block; height: 2.4pt; background: #c8442a;
+       vertical-align: middle; margin-right: 1mm; }
+
+/* ------------------------------------------------ v2: names, notes, picks */
+.rlocal { font-size: 7pt; color: #4a4a4a; line-height: 1.3; }
+.dag { color: #9a9a9a; font-size: 6pt; margin-left: .6mm; }
+.pick { color: #6a3fa0; font-size: 10pt; font-weight: 700; }
+.field { border: 1pt solid #6a3fa0; background: #f5f0fa; padding: 2mm 2.6mm;
+         margin: 3mm 0; font-size: 7.8pt; break-inside: avoid; }
+.field p { margin: 0 0 1.4mm; }
+.fieldh { font-size: 6.8pt; letter-spacing: 1.6pt; text-transform: uppercase;
+          color: #6a3fa0; font-weight: 700; margin-bottom: .8mm; }
+.rfield { font-size: 6.8pt; color: #4b2a78; line-height: 1.35; }
+.rt.fieldrt { background: #f7f3fb; }
+.topo.photo img { max-height: 150mm; }
+.mine { color: #4b2a78; }             /* first-hand text inside editorial pages */
+.lead { font-size: 8.8pt; }
+
+/* "Important before you go": numbered, boxed, red */
+.imp { border: 1.4pt solid #c8442a; background: #fdf4f1; padding: 3mm 3.4mm;
+       margin: 3mm 0; font-size: 8.4pt; break-inside: avoid; }
+.imp .boxh { color: #c8442a; }
+.imp ol { margin: 1mm 0 0 4mm; padding: 0; }
+.imp li { margin-bottom: 1.6mm; }
+
+/* Approaches box on the crag page */
+.appr { border: 1pt solid #3f6b3f; background: #f3f7f1; padding: 2.4mm 3mm;
+        margin: 3mm 0; font-size: 8pt; break-inside: avoid; }
+.appr .boxh { color: #3f6b3f; }
+
+/* WeasyPrint ignores break-inside on flex rows: wrap each route row in a block */
+.rtw { display: block; break-inside: avoid; }
+
+/* ------------------------------------------------ HTML fallback (browser print) */
+/* Applied only when build_guide.py writes the single-file HTML. Browsers do not
+   support target-counter(), so the contents shows sector links instead. */
+html.htmlmode .toc .pg a::after { content: none; }
+html.htmlmode { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+@media screen {
+  html.htmlmode body { max-width: 210mm; margin: 0 auto; background: #e9e7e1; }
+  html.htmlmode .cover, html.htmlmode .page, html.htmlmode .sector,
+  html.htmlmode .landscape { background: #fff; padding: 12mm; margin-bottom: 6mm; }
+  html.htmlmode .landscape { max-width: 210mm; overflow-x: auto; }
+  html.htmlmode .printhint { background: #fff8d8; border: 1pt solid #d8c46a; padding: 3mm;
+                             margin: 0 0 6mm; font-size: 9pt; }
+}
+@media print { .printhint { display: none; } }

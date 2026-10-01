@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.pdf
+*.skill
+*.zip
+.DS_Store
+notes/
