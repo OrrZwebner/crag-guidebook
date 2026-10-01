@@ -70,6 +70,8 @@ Keep it, the axis file and the image folders next to the guide.
       "parking": [-29.9995, -20.002],             // adds a KML/GPX pin; printed in facts
       "asl": "40 m",
       "routes_count": 4,               // the source's own count — cross-check
+      "routes_omitted": 0,             // select_routes.py: routes on the spine not printed
+      "selection_note": "",            // select_routes.py: "12 of 31 routes shown: …"
       "ticks": 120,                    // logged ascents = popularity
       "grades": "5a–6b", "height": "20 m", "qd": "8",
       "bolted": "2001", "bolt_status": "…",
@@ -111,6 +113,11 @@ Keep it, the axis file and the image folders next to the guide.
   ]
 }
 ```
+
+Fields written by `select_routes.py`: `routes` (the kept routes), `routes_count`,
+`routes_omitted`, `selection_note`, `crag.selection` {rule, min_stars, scale_max,
+routes_total, routes_shown, note} and `crag.spine_total` (= Σ routes_count). I1 then
+reads Σ (routes + routes_omitted) = spine_total.
 
 Fields written by `crag_conditions.py`: `aspect`, `aspect_deg`, `bank`,
 `dist_to_axis_m`, `axis_bearing`, `sun`, `sun_flat`, `aspect_confidence`, and
