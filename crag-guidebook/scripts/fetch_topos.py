@@ -42,7 +42,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-UA = 'crag-guidebook/1.2 (https://github.com/OrrZwebner/crag-guidebook)'
+UA = 'crag-guidebook/1.3 (https://github.com/OrrZwebner/crag-guidebook)'
 OVERPASS = 'https://overpass-api.de/api/interpreter'
 COMMONS = 'https://commons.wikimedia.org/w/api.php'
 IMG_KEY = re.compile(r'^wikimedia_commons(?::?(\d+))?$')

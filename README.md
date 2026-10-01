@@ -25,6 +25,8 @@ You get back the guide as a PDF — or, if the app can't make PDFs, an HTML file
 
 Shade times are calculated and approximate; the guide says so, and prints first-hand observations instead where someone has checked.
 
+When a crag has more routes than a guide can print, it keeps every route the community rates ★★ or better, at any grade — never a selection by grade or by popularity — and says how many it left out. Sectors are never dropped for their season; shady ones are included with their conditions printed.
+
 The printed maps show the real surroundings from OpenStreetMap (roads, tracks, paths, cliffs, water, buildings, parking) under numbered sector pins, and flag any sector whose shade aspect disagrees with the mapped cliff.
 
 ## License
