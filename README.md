@@ -25,6 +25,8 @@ You get back the guide as a PDF — or, if the app can't make PDFs, an HTML file
 
 Shade times are calculated and approximate; the guide says so, and prints first-hand observations instead where someone has checked.
 
+The printed maps show the real surroundings from OpenStreetMap (roads, tracks, paths, cliffs, water, buildings, parking) under numbered sector pins, and flag any sector whose shade aspect disagrees with the mapped cliff.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).

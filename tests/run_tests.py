@@ -54,8 +54,10 @@ def run(script, *args, py=PY):
 
 
 def has(mod, py=PY):
-    if py == PY:
-        return importlib.util.find_spec(mod) is not None
+    # import for real: a package can be installed but unusable (e.g. WeasyPrint without a
+    # loadable pango, as on an x86_64 Python next to arm64 Homebrew libraries)
+    if py == PY and importlib.util.find_spec(mod) is None:
+        return False
     return subprocess.run([py, '-c', 'import ' + mod], capture_output=True).returncode == 0
 
 
@@ -214,12 +216,57 @@ class Fixture(unittest.TestCase):
 
     def test_make_maps(self):
         code, out, _ = run('make_maps.py', '--crag', self.crag_path, '--out',
-                           os.path.join(self.tmp, 'maps'))
+                           os.path.join(self.tmp, 'maps'), '--context', 'none')
         if not has('matplotlib'):
             self.assertEqual((code, out['missing']), (3, 'matplotlib'))
             return
         self.assertEqual(code, 0)
         self.assertTrue(os.path.exists(out['maps'][0]['image']))
+        self.assertEqual(out['maps'][0]['context'], 'none')
+
+    def test_make_maps_osm_context(self):
+        if not has('matplotlib'):
+            self.skipTest('matplotlib not available')
+        lat, lon = self.crag['sectors'][0]['lat'], self.crag['sectors'][0]['lon']
+        g = lambda pts: [{'lat': lat + a, 'lon': lon + b} for a, b in pts]
+        ctx = {'elements': [
+            {'type': 'way', 'tags': {'highway': 'tertiary'}, 'geometry': g([(-.002, -.003), (-.002, .003)])},
+            {'type': 'way', 'tags': {'highway': 'path'}, 'geometry': g([(-.002, 0), (0, 0)])},
+            {'type': 'way', 'tags': {'natural': 'cliff'}, 'geometry': g([(.0002, -.001), (.0002, .001)])},
+            {'type': 'way', 'tags': {'natural': 'water'},
+             'geometry': g([(-.003, -.001), (-.003, 0), (-.0035, 0), (-.003, -.001)])},
+            {'type': 'way', 'tags': {'building': 'yes'}, 'geometry': g([(.001, .001), (.001, .0012), (.0012, .0012)])},
+            {'type': 'node', 'tags': {'amenity': 'parking'}, 'lat': lat - .0018, 'lon': lon},
+            {'type': 'way', 'tags': {'highway': 'proposed'}, 'geometry': g([(0, 0), (.001, .001)])}]}
+        cf = os.path.join(self.tmp, 'ctx.json')
+        with open(cf, 'w', encoding='utf-8') as f:
+            json.dump(ctx, f)
+        code, out, p = run('make_maps.py', '--crag', self.crag_path, '--out',
+                           os.path.join(self.tmp, 'maps'), '--context', 'file', '--context-file', cf)
+        self.assertEqual(code, 0, p.stderr)
+        m = out['maps'][0]
+        self.assertEqual(m['context'], 'file')
+        self.assertEqual(m['context_features'], {'water': 1, 'building': 1, 'cliff': 1, 'path': 1,
+                                                 'minor': 1, 'pnode': 1})   # 'proposed' ignored
+        self.assertTrue(any('OpenStreetMap' in n for n in out['notes']))
+        # the cliff runs W→E just north of sector 1, so its down-slope (right) side faces S
+        chk = {c['sector']: c for c in m['cliff_check']}
+        self.assertEqual(chk[1]['osm_cliff_facing'], 180)
+        self.assertEqual(chk[1]['agrees'],
+                         abs((180 - self.crag['sectors'][0]['aspect_deg'] + 180) % 360 - 180) <= 90)
+
+    def test_source_override_wording(self):
+        sec = next(s for s in self.crag['sectors'] if s.get('shade_override'))
+        sec['shade_override']['kind'] = 'source'
+        with open(self.crag_path, 'w', encoding='utf-8') as f:
+            json.dump(self.crag, f)
+        out = self.build_html()
+        with open(out['html'], encoding='utf-8') as f:
+            doc = f.read()
+        self.assertIn('Calculation, superseded by the source statement above', doc)
+        self.assertIn('calc., superseded by source', doc)
+        self.assertIn('<span class="small">(source)</span>', doc)
+        self.assertNotIn('contradicted by the observation above', doc)
 
     # ------------------------------------------------------------ PDF + mode C round trip
     def test_pdf_round_trip(self):
@@ -387,7 +434,7 @@ class FetchTopos(unittest.TestCase):
         self.assertEqual(o['node/102']['grade'], '6a')
         self.assertEqual((o['way/103']['lat'], o['way/103']['lon']), (-30.0002, -20.0013))
         self.assertEqual([x['osm'] for x in out['objects']][:2], ['node/101', 'node/104'])
-        self.assertTrue(FakeWeb.log[0][1].startswith('crag-guidebook/1.1 ('))
+        self.assertTrue(FakeWeb.log[0][1].startswith('crag-guidebook/1.2 ('))
 
     def test_fetch_entries_and_credits(self):
         _, osm = self.find()
@@ -411,7 +458,7 @@ class FetchTopos(unittest.TestCase):
         self.assertEqual(pts[2], {'x': 0.3, 'y': 0.1, 'type': 'anchor', 'dotted_before': True})
         self.assertTrue(os.path.exists(os.path.join(self.ex, 'topo', 'osm_01a.png')))
         self.assertTrue(os.path.exists(os.path.join(self.ex, 'topo', 'osm_01a.lines.svg')))
-        self.assertTrue(all(ua.startswith('crag-guidebook/1.1') for _, ua, _ in FakeWeb.log))
+        self.assertTrue(all(ua.startswith('crag-guidebook/1.2') for _, ua, _ in FakeWeb.log))
         # personal use only with consent
         code, out, _ = self.ft('fetch', '--objects', osm, '--crag', self.crag_path,
                                '--allow-personal-use', '--select', 'node/101')
@@ -468,6 +515,18 @@ class FetchTopos(unittest.TestCase):
         self.assertEqual(len(FakeWeb.log), 1)
         with open(self.crag_path, encoding='utf-8') as f:
             self.assertEqual(f.read(), before)
+
+    def test_maps_blocked_stops(self):
+        if not has('matplotlib'):
+            self.skipTest('matplotlib not available')
+        FakeWeb.block = {'overpass'}
+        code, out, _ = run('make_maps.py', '--crag', self.crag_path, '--out',
+                           os.path.join(self.tmp, 'maps'), '--split', '1-2,3-4',
+                           '--overpass-url', self.base + '/overpass', '--delay', '0', '--timeout', '5')
+        self.assertEqual(code, 0)
+        self.assertEqual(out['context_stopped']['status'], 'blocked')
+        self.assertEqual([m['context'] for m in out['maps']], ['unavailable', 'unavailable'])
+        self.assertEqual(len(FakeWeb.log), 1)                    # no retry, no mirror after a block
 
     def test_offline(self):
         code, out, _ = run('fetch_topos.py', 'find', '--lat', '-30', '--lon', '-20',

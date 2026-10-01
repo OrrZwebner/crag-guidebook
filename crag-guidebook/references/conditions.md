@@ -99,6 +99,24 @@ When a first-hand observation **contradicts** the calculation:
 When an observation **agrees**, keep the calculation and add the observation, credited,
 to `conditions_extra` as corroboration.
 
+**Source-stated overrides.** A guidebook or database may state the shade directly
+("in winter shade after 15:00"). If the user wants that printed instead of the
+calculation, use the same `shade_override` with `"kind": "source"`, a headline naming the
+source ("Shade (theCrag, winter): after ~15:00") and the quote in `sentence`. The builder
+then labels it *source* / "superseded by source" instead of *observed* / "contradicted":
+never present a database quote as somebody's observation.
+
+## Calibrating the model
+
+The ±88° arc treats a wall as sunlit until the sun is almost side-on. Real walls lose the
+sun earlier (the hillside, side ridges, the wall's own relief). On one region (Costa Blanca,
+Feb 2027) the default gave 1.5–2.5 h too much afternoon sun against 4 of 7 source
+statements; `--arc 65 --horizon 15` brought 6 of 7 within an hour. When at least five
+independent source statements exist and most disagree in one direction, try a few
+`--arc`/`--horizon` pairs, keep the one with most agreement, print the parameters and the
+agreement count in the Cross-check box, and leave the outliers visible. Do not change a
+sector's aspect to fit its own statement — that makes the check circular.
+
 A **crag-wide** observation ("one side of the valley is shaded until about X, because
 the other side shades it") goes on the Important page and the planning page, credited
 as first-hand.

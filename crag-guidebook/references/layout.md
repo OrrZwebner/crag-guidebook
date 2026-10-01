@@ -79,6 +79,7 @@ Keep it, the axis file and the image folders next to the guide.
       "conditions_extra": "",          // a credited observation that AGREES, a source quote
       "aspect_manual": null,           // degrees; overrides the calculated aspect
       "shade_override": {              // an observation that CONTRADICTS the calculation
+        "kind": "observed",              // or "source": a guidebook/database statement
         "headline": "Shade (observed 2026-06-01): until about 10:00 · afternoon not observed",
         "sentence": "By calculation … <b>That is not what happens.</b> <span class='mine'>…</span>",
         "table": "<b>until ~10:00</b><div class='tgr'>observed 2026-06-01 · calc. said 13:00</div>",
