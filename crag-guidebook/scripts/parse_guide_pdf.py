@@ -151,6 +151,14 @@ def prose_fields(lines):
     fields, paras = {}, {}
     section, last_y, last_kind = 'intro', None, None
     for ln in lines:
+        p0 = ln['parts'][0]
+        if (last_kind == 'fieldhead' and near(p0['c'], gs.PICK) and bold(p0)
+                and szeq(p0['sz'], 6.8)):
+            # the letter-spaced field-notes header wrapped (font metrics differ by
+            # platform): the next header-styled line continues it, not the intro
+            fields['_field_header'] = unspace(fields.get('_field_header', '') + ' ' + ln['t'])
+            last_y = ln['y']
+            continue
         k = classify(ln, section)
         if k == 'head':
             m = [v for h, v in HEADS if ln['t'].strip().startswith(h)]
