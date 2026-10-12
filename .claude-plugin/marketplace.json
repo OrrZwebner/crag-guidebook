@@ -1,0 +1,12 @@
+{
+  "name": "crag-guidebook",
+  "owner": { "name": "Orr Zwebner" },
+  "metadata": { "description": "Marketplace for the crag-guidebook plugin." },
+  "plugins": [
+    {
+      "name": "crag-guidebook",
+      "description": "Build a printable rock-climbing crag guidebook plus KML/GPX/CSV maps from climbing databases, guidebook photos and local sources.",
+      "source": "./"
+    }
+  ]
+}
