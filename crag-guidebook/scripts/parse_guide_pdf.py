@@ -500,6 +500,9 @@ def main():
                 sec['sun'] = None
             if g.get('routes', '').isdigit():
                 sec['routes_count'] = int(g['routes'])
+                listed = g.get('routes_listed', '')
+                if listed.isdigit() and int(listed) < int(g['routes']):
+                    sec['routes_omitted'] = int(g['routes']) - int(listed)   # a selected guide
         sec['routes'] = [finish_route(r, report) for r in s['routes']]
         for r in sec['routes']:
             if r.get('rating') == 'top_pick':

@@ -257,12 +257,16 @@ def sector_html(s, meta, img):
     head_bits = [e(gs.shade_headline(s, meta))]
     if s.get('routes_count'):
         head_bits.append('%s routes' % e(s['routes_count']))
+        if s.get('routes_omitted'):
+            head_bits.append('%d shown' % len(s.get('routes', [])))
     if s.get('grades'):
         head_bits.append(e(s['grades']))
     if s.get('height'):
         head_bits.append('up to %s' % e(s['height']))
 
     prose = ['<p class="lead">%s</p>' % e(s.get('intro', ''))]
+    if s.get('selection_note'):
+        prose.append('<p class="small">%s.</p>' % e(s['selection_note']))
     if s.get('field_notes'):
         by, date = field_by(meta)
         title = 'Field notes' + (' — %s' % by if by else '') + (', visit of %s' % date if date else '')

@@ -56,7 +56,7 @@ import urllib.request
 
 plt = withStroke = withTickedStroke = None   # imported lazily in main(): optional dependency
 
-UA = 'crag-guidebook/1.2 (https://github.com/OrrZwebner/crag-guidebook)'
+UA = 'crag-guidebook/1.3 (https://github.com/OrrZwebner/crag-guidebook)'
 OVERPASS = 'https://overpass-api.de/api/interpreter'
 # public mirrors, tried in order only when a server is overloaded or offline (5xx, timeout),
 # never after a 403/429 block

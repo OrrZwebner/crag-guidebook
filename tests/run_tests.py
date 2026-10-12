@@ -38,7 +38,7 @@ PY_PDF = os.environ.get('CRAG_PDF_PYTHON', PY)
 sys.path.insert(0, SCRIPTS)
 import guide_style as gs                                           # noqa: E402
 
-CLIS = ['crag_conditions.py', 'make_maps.py', 'export_geo.py', 'build_guide.py',
+CLIS = ['crag_conditions.py', 'make_maps.py', 'select_routes.py', 'export_geo.py', 'build_guide.py',
         'verify_guide.py', 'parse_guide_pdf.py', 'photo_gps.py', 'attach_images.py',
         'fetch_topos.py']
 
@@ -255,6 +255,32 @@ class Fixture(unittest.TestCase):
         self.assertEqual(chk[1]['agrees'],
                          abs((180 - self.crag['sectors'][0]['aspect_deg'] + 180) % 360 - 180) <= 90)
 
+    def test_select_routes(self):
+        sys.path.insert(0, SCRIPTS)
+        import select_routes as sr
+        R = lambda st, g='6a': {'name': 'r', 'grade': g, 'stars': st}
+        kept, note = sr.select([R(3, '8a'), R(2, '4'), R(1, '7a'), R(None, '6b'), R(0)], 2)
+        self.assertEqual([(r['stars'], r['grade']) for r in kept], [(3, '8a'), (2, '4')])  # grade-blind
+        self.assertIsNone(note)
+        kept, note = sr.select([R(1), R(0), R(None)], 2)          # nothing qualifies: best-rated
+        self.assertEqual([r['stars'] for r in kept], [1])
+        self.assertIn('highest-rated', note)
+        kept, note = sr.select([R(None), R(None)], 2)             # nothing rated: keep all
+        self.assertEqual(len(kept), 2)
+        before = sum(len(s['routes']) for s in self.crag['sectors'])
+        code, out, p = run('select_routes.py', '--crag', self.crag_path)
+        self.assertEqual(code, 0, p.stderr)
+        self.assertEqual(out['routes_total'], before)
+        with open(self.crag_path, encoding='utf-8') as f:
+            c = json.load(f)
+        self.assertEqual(sum(len(s['routes']) + s['routes_omitted'] for s in c['sectors']),
+                         c['crag']['spine_total'])                # I1 identity holds
+        code, out, _ = run('select_routes.py', '--crag', self.crag_path)
+        self.assertTrue(out['unchanged'])                         # idempotent
+        out = self.build_html()
+        code, v, _ = run('verify_guide.py', '--guide', out['html'], '--crag', self.crag_path)
+        self.assertTrue(v['all_pass'], [c for c in v['checks'] if not c['pass']])   # incl. I1, I4
+
     def test_source_override_wording(self):
         sec = next(s for s in self.crag['sectors'] if s.get('shade_override'))
         sec['shade_override']['kind'] = 'source'
@@ -437,7 +463,7 @@ class FetchTopos(unittest.TestCase):
         self.assertEqual(o['node/102']['grade'], '6a')
         self.assertEqual((o['way/103']['lat'], o['way/103']['lon']), (-30.0002, -20.0013))
         self.assertEqual([x['osm'] for x in out['objects']][:2], ['node/101', 'node/104'])
-        self.assertTrue(FakeWeb.log[0][1].startswith('crag-guidebook/1.2 ('))
+        self.assertTrue(FakeWeb.log[0][1].startswith('crag-guidebook/1.3 ('))
 
     def test_fetch_entries_and_credits(self):
         _, osm = self.find()
@@ -461,7 +487,7 @@ class FetchTopos(unittest.TestCase):
         self.assertEqual(pts[2], {'x': 0.3, 'y': 0.1, 'type': 'anchor', 'dotted_before': True})
         self.assertTrue(os.path.exists(os.path.join(self.ex, 'topo', 'osm_01a.png')))
         self.assertTrue(os.path.exists(os.path.join(self.ex, 'topo', 'osm_01a.lines.svg')))
-        self.assertTrue(all(ua.startswith('crag-guidebook/1.2') for _, ua, _ in FakeWeb.log))
+        self.assertTrue(all(ua.startswith('crag-guidebook/1.3') for _, ua, _ in FakeWeb.log))
         # personal use only with consent
         code, out, _ = self.ft('fetch', '--objects', osm, '--crag', self.crag_path,
                                '--allow-personal-use', '--select', 'node/101')

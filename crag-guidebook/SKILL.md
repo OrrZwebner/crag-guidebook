@@ -19,7 +19,7 @@ compatibility: >-
   checks), Pillow and pillow-heif (photo GPS, HEIC), matplotlib (plan maps). Web access helps
   for research.
 metadata:
-  version: 1.2.1
+  version: 1.3.0
 ---
 
 # Crag guidebook
@@ -102,6 +102,12 @@ Read `references/sources.md` first.
 6. Keep both readings wherever sources disagree (`xref`); never average. Log every
    conflict for the contradictions appendix.
 7. Keep the spine's route numbering when you use its topos, so topo numbers match.
+8. **Too many routes to print?** Collect each chosen sector's *complete* list, then run
+   `scripts/select_routes.py --crag crag.json` (keeps every route rated ★★ or better on
+   the spine's scale, at any grade; records what it left out). Never select by grade
+   bands or by logged ascents — ascents pile up on easy grades and pull the guide down.
+   Choose sectors by popularity and quality; never drop one for its season or aspect —
+   include it and print its conditions. Say on the About page that it is a selection.
 
 Fill `crag.json` as you go — schema in `references/layout.md`, a complete synthetic
 example in `examples/crag.json`.
@@ -236,6 +242,9 @@ limitation: it reads only PDFs this skill rendered with WeasyPrint.
   segment.
 - **Always print the accuracy caveat** at the front.
 - **Unknown is not fine.** Render unknown bolt state distinctly from maintained.
+- **Select by quality, never by grade.** A selection keeps routes by the spine's star
+  rating only (`select_routes.py`), so the guide reflects the crag, not one climber's
+  level; sectors are never dropped for season — their conditions are printed.
 - **Both readings, one spine.** Never average grades; a visitor's opinion goes in a
   note.
 - **† over blank** when the transliteration is clear; **blank over wrong** when not.
@@ -258,6 +267,7 @@ limitation: it reads only PDFs this skill rendered with WeasyPrint.
 | `photo_gps.py` | EXIF GPS/time from JPG/HEIC; `--to-jpg` | Pillow (+ pillow-heif) |
 | `attach_images.py` | add `topo/` and `img/` files by naming convention | stdlib |
 | `fetch_topos.py` | `find` OSM climbing objects; `fetch` Commons photos + credits + route lines | stdlib, web |
+| `select_routes.py` | grade-neutral selection: every route ★★+ on the spine's scale; records omitted counts | stdlib |
 | `guide_style.py` | shared style keys and the shade rule (module, not a CLI) | — |
 
 ## References

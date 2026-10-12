@@ -6,7 +6,7 @@ Checks (each reported as pass/fail with detail):
   no_sun_headlines       no "Sun HH:MM–HH:MM" anywhere: conditions are printed as shade
   headlines_say_shade    every sector's headline is printed and contains "Shade"
   contents_shade_column  the contents column is headed "Shade, <month>", not "Sun"
-  I1_route_total         routes in crag.json = crag.spine_total (or Σ routes_count)
+  I1_route_total         routes in crag.json (+ routes_omitted) = crag.spine_total (or Σ routes_count)
   I2_baseline_counts     per-sector route counts = --baseline (a previous crag.json)
   I3_shade_complement    sun window inside daylight and |shade| + |sun| = |daylight|
   I4_local_names         sourced + reconstructed + blank = total; every name printed;
@@ -186,12 +186,15 @@ def main():
           'expects "Shade, %s"' % month)
 
     # I1
-    total = sum(len(s.get('routes', [])) for s in sectors)
+    # with a selection (select_routes.py), omitted routes count towards the spine total
+    total = sum(len(s.get('routes', [])) for s in sectors)          # routes printed
+    on_spine = total + sum(int(s.get('routes_omitted') or 0) for s in sectors)
     spine = meta.get('spine_total')
     if spine is None and all(s.get('routes_count') is not None for s in sectors):
         spine = sum(int(s['routes_count']) for s in sectors)
-    check('I1_route_total', spine is None or total == int(spine),
-          '%d routes; spine claims %s' % (total, spine))
+    check('I1_route_total', spine is None or on_spine == int(spine),
+          '%d routes (%d printed + %d omitted by the selection); spine claims %s'
+          % (on_spine, total, on_spine - total, spine))
 
     # I2
     if args.baseline:
