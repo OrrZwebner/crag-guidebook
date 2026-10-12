@@ -1,0 +1,7 @@
+{
+  "name": "crag-guidebook",
+  "version": "1.2.1",
+  "description": "Build a printable rock-climbing crag guidebook plus KML/GPX/CSV maps from climbing databases, guidebook photos and local sources.",
+  "author": { "name": "Orr Zwebner" },
+  "skills": ["./crag-guidebook"]
+}
